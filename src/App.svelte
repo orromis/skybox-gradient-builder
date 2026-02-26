@@ -1,5 +1,10 @@
 <script lang="ts">
 	import './app.css';
+	import CubemapDiagram from './lib/cubemap-diagram.svelte';
+	import ColorPicker from 'svelte-awesome-color-picker';
+
+	let gradient1: string = '#00ddff';
+	let gradient2: string = '#00ff51';
 </script>
 
 <main class="mx-auto">
@@ -19,5 +24,10 @@
 			project and finding out that the process is a bit more complicated then I expected it to be.
 			And I can also try out Svelte!
 		</p>
+
+		<ColorPicker bind:hex={gradient1} position="responsive" />
+		<ColorPicker bind:hex={gradient2} position="responsive" />
+
+		<CubemapDiagram {gradient1} {gradient2} width={600} />
 	</article>
 </main>
