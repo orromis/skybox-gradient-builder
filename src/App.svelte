@@ -1,7 +1,7 @@
 <script lang="ts">
 	import './app.css';
 	import CubemapDiagram from './lib/cubemap-diagram.svelte';
-	import ColorPicker from 'svelte-awesome-color-picker';
+	import GradientPicker from './lib/gradient/picker.svelte';
 
 	let gradient1: string = '#00ddff';
 	let gradient2: string = '#00ff51';
@@ -25,8 +25,7 @@
 			And I can also try out Svelte!
 		</p>
 
-		<ColorPicker bind:hex={gradient1} position="responsive" />
-		<ColorPicker bind:hex={gradient2} position="responsive" />
+		<GradientPicker />
 
 		<CubemapDiagram {gradient1} {gradient2} width={600} />
 	</article>
