@@ -1,10 +1,10 @@
 <script lang="ts">
 	import './app.css';
 	import CubemapDiagram from './lib/cubemap-diagram.svelte';
+	import { Gradient } from './lib/gradient/color.svelte';
 	import GradientPicker from './lib/gradient/picker.svelte';
 
-	let gradient1: string = '#00ddff';
-	let gradient2: string = '#00ff51';
+	let gradient = $state(new Gradient());
 </script>
 
 <main class="mx-auto">
@@ -25,8 +25,8 @@
 			And I can also try out Svelte!
 		</p>
 
-		<GradientPicker />
+		<GradientPicker bind:gradient />
 
-		<CubemapDiagram {gradient1} {gradient2} width={600} />
+		<CubemapDiagram {gradient} width={600} />
 	</article>
 </main>

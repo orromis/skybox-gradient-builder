@@ -1,11 +1,12 @@
 <script lang="ts">
+	import type { Gradient } from './gradient/color.svelte';
+
 	interface Props {
-		gradient1: string;
-		gradient2: string;
+		gradient: Gradient;
 		width: number;
 	}
 
-	let { gradient1, gradient2, width }: Props = $props();
+	let { gradient, width }: Props = $props();
 
 	let faceWidth = $state(0);
 	let faceHeight = $state(0);
@@ -23,8 +24,9 @@
 <svg {width} {height}>
 	<defs>
 		<linearGradient id="gradient">
-			<stop offset="0%" stop-color={gradient1} />
-			<stop offset="100%" stop-color={gradient2} />
+			{#each gradient.colors as color}
+				<stop offset={`${color.clampedPosition * 100}%`} stop-color={color.cssColor} />
+			{/each}
 		</linearGradient>
 	</defs>
 	<!-->draw cubemap faces</-->
