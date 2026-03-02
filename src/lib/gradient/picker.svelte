@@ -60,7 +60,7 @@
 
 <div
 	class="relative m-2 h-5 w-sm"
-	style:background={gradient.gradientString}
+	style:background={gradient.getCssString(false)}
 	bind:clientWidth={knobContainerWidth}
 >
 	{#each gradient.colors as color, i}

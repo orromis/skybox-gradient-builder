@@ -29,15 +29,6 @@ export class Gradient {
 		this.angle = $state(angle);
 	}
 
-	get gradientString() {
-		const gradientColors = [];
-		for (const color of this.colors) {
-			gradientColors.push(`${color.cssColor} ${color.clampedPosition * 100}%`);
-		}
-
-		return `linear-gradient(${this.angle}deg, ${gradientColors.join(',')})`;
-	}
-
 	get direction() {
 		const angleRad = (Math.PI / 180) * this.angle;
 		return new Vector3(0, 1, 0).applyAxisAngle({ x: 0, y: 0, z: 1 }, angleRad);
@@ -76,5 +67,14 @@ export class Gradient {
 		} else if (colorRight) {
 			return colorRight.rgb;
 		}
+	}
+
+	getCssString(applyAngle = true) {
+		const gradientColors = [];
+		for (const color of this.colors) {
+			gradientColors.push(`${color.cssColor} ${color.clampedPosition * 100}%`);
+		}
+
+		return `linear-gradient(${applyAngle ? this.angle : 90}deg, ${gradientColors.join(',')})`;
 	}
 }
