@@ -1,12 +1,13 @@
 <script lang="ts">
 	import ColorPicker, { type RgbaColor } from 'svelte-awesome-color-picker';
-	import { Gradient } from './color.svelte';
+	import { Gradient } from './gradient.svelte';
+	import { lerp } from '../utils';
 
 	interface Props {
-		gradient?: Gradient;
+		gradient: Gradient;
 	}
 
-	let { gradient = $bindable(new Gradient()) }: Props = $props();
+	let { gradient = $bindable() }: Props = $props();
 	let currentColorIndex = $state(0);
 	let currentColor = $derived(gradient.colors[currentColorIndex]);
 	let knobContainerWidth = $state(0);
@@ -53,10 +54,6 @@
 			currentColor.position = currentColor.clampedPosition;
 		}
 	}
-
-	function lerp(start: number, end: number, t: number) {
-		return (1 - t) * start + t * end;
-	}
 </script>
 
 <svelte:window onpointermove={dragKnob} onpointerup={stopDraggingKnob} />
@@ -80,3 +77,6 @@
 </div>
 
 <ColorPicker bind:rgb={currentColor.rgb} onInput={colorChanged} isDialog={false} />
+
+<input class="w-sm" type="range" bind:value={gradient.angle} min="0" max="360" />
+<input type="number" bind:value={gradient.angle} min="0" max="360" />

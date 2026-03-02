@@ -1,10 +1,28 @@
 <script lang="ts">
 	import './app.css';
-	import CubemapDiagram from './lib/cubemap-diagram.svelte';
-	import { Gradient } from './lib/gradient/color.svelte';
+	import { Cubemap } from './lib/cubemap.svelte';
+	import { Gradient, GradientColor } from './lib/gradient/gradient.svelte';
 	import GradientPicker from './lib/gradient/picker.svelte';
+	import SkyboxScene from './lib/skybox-scene.svelte';
 
-	let gradient = $state(new Gradient());
+	let textureData: ImageData[] | null = $state(null);
+
+	let gradient = $state(
+		new Gradient([
+			new GradientColor({ r: 0, g: 221, b: 255, a: 1 }, 0),
+			new GradientColor({ r: 0, g: 255, b: 81, a: 1 }, 1)
+		])
+	);
+
+	function attachCanvas(canvas: HTMLCanvasElement) {
+		let context = canvas.getContext('2d');
+		let size = { width: 512, height: 384 };
+		canvas.width = size.width;
+		canvas.height = size.height;
+		if (context) {
+			textureData = new Cubemap(gradient).drawTexture(context, size);
+		}
+	}
 </script>
 
 <main class="mx-auto">
@@ -27,6 +45,7 @@
 
 		<GradientPicker bind:gradient />
 
-		<CubemapDiagram {gradient} width={600} />
+		<canvas {@attach attachCanvas}></canvas>
+		<SkyboxScene {textureData} />
 	</article>
 </main>
