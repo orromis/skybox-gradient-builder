@@ -6,6 +6,7 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 // https://vite.dev/config/
 export default defineConfig({
 	plugins: [tailwindcss(), svelte()],
+	base: '/skybox-gradient-builder/',
 	test: {
 		expect: { requireAssertions: true },
 		projects: [
