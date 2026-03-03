@@ -10,28 +10,29 @@
 		WebGLRenderer
 	} from 'three';
 	import { OrbitControls } from 'three/examples/jsm/Addons.js';
+	import type { CubemapTexture } from './cubemap.svelte';
 
 	interface Props {
-		textureData: ImageData[] | null;
+		cubemapTexture: CubemapTexture | null;
 	}
 
 	type Texture = CubeTexture<ImageData>;
 
-	const { textureData }: Props = $props();
+	const { cubemapTexture }: Props = $props();
 	let cubeTexture: Texture | null = null;
 	let camera: PerspectiveCamera | null = null;
 	let scene: Scene | null = null;
 
 	function setupScene(canvas: HTMLCanvasElement) {
-		if (!textureData) {
+		if (!cubemapTexture) {
 			return;
 		}
 
 		if (!cubeTexture) {
-			cubeTexture = new CubeTexture(textureData);
+			cubeTexture = new CubeTexture(cubemapTexture.textures.map((t) => t.data));
 			cubeTexture.needsUpdate = true;
 		} else {
-			cubeTexture.images = textureData;
+			cubeTexture.images = cubemapTexture.textures.map((t) => t.data);
 			cubeTexture.needsUpdate = true;
 		}
 
@@ -39,22 +40,22 @@
 			return;
 		}
 
+		scene = new Scene();
 		camera = new PerspectiveCamera(60, canvas.width / canvas.height, 0.1, 1000);
 		camera.position.z = 3;
+
 		const orbitControls = new OrbitControls(camera, canvas);
 		orbitControls.minDistance = 2;
 		orbitControls.maxDistance = 10;
 		orbitControls.enablePan = false;
-		scene = new Scene();
 
 		const axes = new AxesHelper();
 		const geometry = new BoxGeometry(0.2, 0.2, 0.2);
 		const material = new MeshNormalMaterial();
-
 		const mesh = new Mesh(geometry, material);
-
 		scene.add(mesh, axes);
 		scene.background = cubeTexture;
+
 		const renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true });
 		renderer.setPixelRatio(window.devicePixelRatio);
 		renderer.setClearColor('#000000');

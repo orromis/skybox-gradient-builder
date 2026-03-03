@@ -1,27 +1,31 @@
 import { Vector3 } from 'three';
 import { Gradient } from './gradient/gradient.svelte';
 
+export interface CubemapTexture {
+	textures: { data: ImageData; x: number; y: number }[];
+	size: number;
+}
+
 export class Cubemap {
 	constructor(public gradient: Gradient) {}
 
 	// based on https://github.com/StereoKit/StereoKit/blob/ed45314218102da2d1952e51aca544c6e5409509/StereoKitC/asset_types/texture.cpp#L1366
-	drawTexture(context: CanvasRenderingContext2D, size: { width: number; height: number }) {
-		context.clearRect(0, 0, size.width, size.height);
+	drawTexture(size: number) {
 		const gradientDir = this.gradient.direction;
 		const faces: { x: number; y: number; index: number }[] = [
-			{ x: 2, y: 1, index: 0 }, // px
+			// nx and px are swapped probably because of this:
+			// https://github.com/mrdoob/three.js/blob/8886ab6e95f4b06945ffb5d19c531c09dc6c5ce7/src/renderers/WebGLCubeRenderTarget.js#L47
 			{ x: 0, y: 1, index: 1 }, // nx
+			{ x: 2, y: 1, index: 0 }, // px
 			{ x: 1, y: 0, index: 2 }, // py
 			{ x: 1, y: 2, index: 3 }, // ny
 			{ x: 1, y: 1, index: 4 }, // pz
 			{ x: 3, y: 1, index: 5 } // nz
 		];
-		const faceWidth = size.width / 4;
-		const faceHeight = size.height / 3;
-		const textureData: ImageData[] = [];
+		const textureData: CubemapTexture = { size, textures: [] };
 
 		for (const face of faces) {
-			const imageData = new ImageData(faceWidth, faceHeight);
+			const imageData = new ImageData(size, size);
 
 			// points are in the following order
 			// p3  p4
@@ -31,14 +35,14 @@ export class Cubemap {
 			const p3 = this.#cubemapCorner(face.index * 4 + 2);
 			const p4 = this.#cubemapCorner(face.index * 4 + 3);
 
-			for (let y = 0; y < faceHeight; y++) {
-				let yPosition = 1 - y / faceHeight;
+			for (let y = 0; y < size; y++) {
+				let yPosition = 1 - y / size;
 				if (face.index == 2) {
 					yPosition = 1 - yPosition;
 				}
 
-				for (let x = 0; x < faceWidth; x++) {
-					let xPosition = 1 - x / faceWidth;
+				for (let x = 0; x < size; x++) {
+					let xPosition = 1 - x / size;
 
 					if (face.index == 2) {
 						xPosition = 1 - xPosition;
@@ -52,7 +56,7 @@ export class Cubemap {
 					const sample = this.gradient.sample(pointGradientPosition);
 
 					if (sample) {
-						const stride = (x + y * faceHeight) * 4;
+						const stride = (x + y * size) * 4;
 						imageData.data[stride] = sample.r;
 						imageData.data[stride + 1] = sample.g;
 						imageData.data[stride + 2] = sample.b;
@@ -60,8 +64,7 @@ export class Cubemap {
 					}
 				}
 			}
-			context.putImageData(imageData, face.x * faceWidth, face.y * faceHeight);
-			textureData.push(imageData);
+			textureData.textures.push({ data: imageData, x: face.x, y: face.y });
 		}
 
 		return textureData;
