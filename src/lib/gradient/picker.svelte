@@ -1,82 +1,69 @@
 <script lang="ts">
 	import ColorPicker, { type RgbaColor } from 'svelte-awesome-color-picker';
 	import { Gradient } from './gradient.svelte';
-	import { lerp } from '../utils';
 
 	interface Props {
 		gradient: Gradient;
 	}
 
 	let { gradient = $bindable() }: Props = $props();
-	let currentColorIndex = $state(0);
-	let currentColor = $derived(gradient.colors[currentColorIndex]);
-	let knobContainerWidth = $state(0);
-	let activeKnob: HTMLDivElement | null = $state(null);
-
-	function colorChanged({ rgb: newColor }: { rgb: RgbaColor | null }) {
-		if (newColor) {
-			currentColor.rgb = newColor;
-		}
-	}
-
-	function dragKnob(event: PointerEvent) {
-		if (event.buttons !== 1 || !activeKnob) {
-			return;
-		}
-
-		currentColor.position += event.movementX / (knobContainerWidth - 4);
-		event.preventDefault();
-		event.stopPropagation();
-	}
-
-	function selectKnob(
-		event: PointerEvent & { currentTarget: HTMLDivElement },
-		colorIndex: number,
-		color: RgbaColor
-	) {
-		if (event.buttons === 1) {
-			event.currentTarget.classList.add('is-dragging');
-			activeKnob = event.currentTarget;
-			currentColorIndex = colorIndex;
-			currentColor.rgb = color;
-		}
-	}
-
-	function stopDraggingKnob(event: PointerEvent) {
-		if (event.button !== 0) {
-			return;
-		}
-
-		if (activeKnob) {
-			activeKnob.classList.remove('is-dragging');
-			activeKnob = null;
-			// clamp the position to avoid storing over dragged values
-			currentColor.position = currentColor.clampedPosition;
-		}
-	}
 </script>
 
-<svelte:window onpointermove={dragKnob} onpointerup={stopDraggingKnob} />
+<div class="flex">
+	<div
+		class="mr-4 h-30 w-30 rounded-md border border-mist-300 dark:border-mist-700"
+		style:background={gradient.getCssString()}
+	></div>
+	<div>
+		{#each gradient.colors as color (color.id)}
+			<div class="flex">
+				<span class="color-picker mr-2">
+					<ColorPicker label="" bind:rgb={color.rgb} />
+				</span>
 
-<div
-	class="relative m-2 h-5 w-sm"
-	style:background={gradient.getCssString(false)}
-	bind:clientWidth={knobContainerWidth}
->
-	{#each gradient.colors as color, i}
-		<div
-			class="absolute -top-1 h-7 w-2 cursor-grab rounded-full [&.is-dragging]:cursor-move"
-			style:background={color.cssColor}
-			style:left={`${lerp(0, knobContainerWidth - 4, color.clampedPosition)}px`}
-			role="slider"
-			aria-valuenow={color.position}
-			tabindex={i}
-			onpointerdown={(event) => selectKnob(event, i, color.rgb)}
-		></div>
-	{/each}
+				<label class="flex items-center justify-center">
+					Color strength
+					<input
+						class="ml-2"
+						type="range"
+						bind:value={color.position}
+						step="0.0001"
+						min="0"
+						max="1"
+					/>
+				</label>
+			</div>
+		{/each}
+		<div class="flex items-center justify-center">
+			<button
+				class="color-mist-200 my-2 rounded-lg bg-indigo-300 px-4 py-2 hover:cursor-pointer dark:bg-indigo-700"
+				onclick={() => gradient.addColor()}>Add color</button
+			>
+		</div>
+		<label>
+			Gradient angle
+			<input type="number" bind:value={gradient.angle} min="0" max="360" />
+		</label>
+		<input class="w-full" type="range" bind:value={gradient.angle} min="0" max="360" />
+	</div>
 </div>
 
-<ColorPicker bind:rgb={currentColor.rgb} onInput={colorChanged} isDialog={false} />
+<style>
+	.color-picker {
+		--cp-bg-color: var(--color-mist-300);
+		--cp-border-color: var(--color-mist-200);
+		--cp-text-color: black;
+		--cp-input-color: var(--color-mist-400);
+		--cp-button-hover-color: var(--color-mist-200);
+		--focus-color: var(--color-mist-800);
 
-<input class="w-sm" type="range" bind:value={gradient.angle} min="0" max="360" />
-<input type="number" bind:value={gradient.angle} min="0" max="360" />
+		@media (prefers-color-scheme: dark) {
+			--cp-bg-color: var(--color-mist-700);
+			--cp-border-color: var(--color-mist-800);
+			--cp-text-color: white;
+			--cp-input-color: var(--color-mist-600);
+			--cp-button-hover-color: var(--color-mist-800);
+			--focus-color: var(--color-mist-200);
+		}
+	}
+</style>

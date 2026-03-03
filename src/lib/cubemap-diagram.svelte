@@ -15,10 +15,6 @@
 		}
 
 		context.clearRect(0, 0, canvas.width, canvas.height);
-		if (!context) {
-			contextUnavailable = true;
-			return;
-		}
 
 		for (const texture of cubemapTexture.textures) {
 			context.putImageData(
@@ -30,4 +26,10 @@
 	}
 </script>
 
-<canvas class={props.class} {@attach attachCanvas}> </canvas>
+{#if contextUnavailable}
+	<div class={['flex items-center justify-center', props.class]}>
+		<p>Your browser is not supported.</p>
+	</div>
+{:else}
+	<canvas class={props.class} {@attach attachCanvas}> </canvas>
+{/if}

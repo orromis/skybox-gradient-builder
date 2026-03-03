@@ -14,11 +14,12 @@
 
 	interface Props {
 		cubemapTexture: CubemapTexture | null;
+		class?: string;
 	}
 
 	type Texture = CubeTexture<ImageData>;
 
-	const { cubemapTexture }: Props = $props();
+	const { cubemapTexture, ...props }: Props = $props();
 	let cubeTexture: Texture | null = null;
 	let camera: PerspectiveCamera | null = null;
 	let scene: Scene | null = null;
@@ -48,6 +49,9 @@
 		orbitControls.minDistance = 2;
 		orbitControls.maxDistance = 10;
 		orbitControls.enablePan = false;
+		// set the camera rotation so that the projection corresponds with
+		// 2D gradient visualisation
+		orbitControls.rotateLeft(Math.PI);
 
 		const axes = new AxesHelper();
 		const geometry = new BoxGeometry(0.2, 0.2, 0.2);
@@ -85,4 +89,4 @@
 	}
 </script>
 
-<canvas width="800" height="600" {@attach setupScene}></canvas>
+<canvas class={props.class} width="800" height="600" {@attach setupScene}></canvas>

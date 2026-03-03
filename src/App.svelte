@@ -12,19 +12,37 @@
 			new GradientColor({ r: 0, g: 255, b: 81, a: 1 }, 1)
 		])
 	);
-	const cubemapTexture = $derived(new Cubemap(gradient).drawTexture(64));
+	let textureSize = $state(64);
+	const cubemapTexture = $derived(new Cubemap(gradient).drawTexture(textureSize));
 </script>
 
-<main class="mx-auto">
-	<header>
-		<h1>Skybox builder</h1>
-	</header>
-	<article>
-		<p>This tools generates gradient cubemap textures and visualises them in 3D.</p>
+<main class="container mx-auto">
+	<article class="m-4">
+		<section class="mb-4 text-lg">
+			<header class="mb-4 text-3xl">
+				<h1>Skybox builder</h1>
+			</header>
+			<p>This tools generates gradient cubemap texture and renders it in 3D.</p>
+		</section>
 
-		<GradientPicker bind:gradient />
+		<div class="flex">
+			<div class="mr-4 flex-2">
+				<section class="mb-4">
+					<h2 class="mb-4 text-xl">Texture and gradient settings</h2>
+					<GradientPicker bind:gradient />
+				</section>
 
-		<CubemapDiagram class="h-3/4 w-md" {cubemapTexture} />
-		<SkyboxScene {cubemapTexture} />
+				<section class="mb-4">
+					<h2 class="mb-4 text-xl">Cubemap diagram</h2>
+					<CubemapDiagram class="h-3/4 w-md" {cubemapTexture} />
+				</section>
+			</div>
+			<div class="relative flex-3">
+				<div class="sticky top-24">
+					<h2 class="mb-4 text-xl">3D preview</h2>
+					<SkyboxScene class="w-full" {cubemapTexture} />
+				</div>
+			</div>
+		</div>
 	</article>
 </main>

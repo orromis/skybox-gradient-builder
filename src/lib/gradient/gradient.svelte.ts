@@ -2,9 +2,12 @@ import type { RgbaColor } from 'svelte-awesome-color-picker';
 import { clamp, lerp } from '../utils';
 import { Vector3 } from 'three';
 
+let counter = 0;
+
 export class GradientColor {
 	rgb: RgbaColor;
 	position: number;
+	id = counter++;
 
 	constructor(color: RgbaColor, position: number) {
 		this.rgb = $state(color);
@@ -69,12 +72,21 @@ export class Gradient {
 		}
 	}
 
-	getCssString(applyAngle = true) {
+	getCssString() {
 		const gradientColors = [];
 		for (const color of this.colors) {
 			gradientColors.push(`${color.cssColor} ${color.clampedPosition * 100}%`);
 		}
 
-		return `linear-gradient(${applyAngle ? this.angle : 90}deg, ${gradientColors.join(',')})`;
+		return `linear-gradient(${this.angle}deg, ${gradientColors.join(',')})`;
+	}
+
+	addColor() {
+		const r = Math.floor(Math.random() * 255);
+		const g = Math.floor(Math.random() * 255);
+		const b = Math.floor(Math.random() * 255);
+
+		this.colors.push(new GradientColor({ r, g, b, a: 1 }, Math.random()));
+		this.colors.sort((a, b) => a.clampedPosition - b.clampedPosition);
 	}
 }
