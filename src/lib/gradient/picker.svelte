@@ -20,15 +20,13 @@
 	let thumbWidth = $state(0);
 	let thumbOffset = $derived(gradientContainerWidth - thumbWidth);
 
-	function drag(event: PointerEvent) {
-		if (event.buttons !== 1 || !dragging) {
+	function drag(movementX: number) {
+		if (!dragging) {
 			return;
 		}
 
-		activePosition += event.movementX / thumbOffset;
+		activePosition += movementX / thumbOffset;
 		activeColor.position = clamp(activePosition, 0, 1);
-		event.preventDefault();
-		event.stopPropagation();
 	}
 
 	function stopDragging() {
@@ -49,20 +47,41 @@
 		activeColor = color;
 	}
 
-	function colorKeyDown(event: KeyboardEvent, color: GradientColor) {
-		switch (event.code) {
+	function colorKeyActivate(event: KeyboardEvent, color: GradientColor) {
+		switch (event.key) {
+			case 'Enter':
+			case ' ':
+			case 'Spacebar':
+				activateColor(color);
+				return;
+		}
+
+		colorKeyMove(event, color);
+		event.stopPropagation();
+	}
+
+	function colorKeyMove(event: KeyboardEvent, color = activeColor) {
+		switch (event.key) {
 			case 'ArrowLeft':
 				color.position = clamp(color.position - 0.01, 0, 1);
 				break;
 			case 'ArrowRight':
 				color.position = clamp(color.position + 0.01, 0, 1);
 				break;
-			case 'Enter':
-			case ' ':
-			case 'Space':
-				activateColor(color);
-				break;
 		}
+	}
+
+	let lastTouch: Touch | null = null;
+	function touch(e: TouchEvent) {
+		if (lastTouch) {
+			drag(e.changedTouches[0].pageX - lastTouch.pageX);
+		}
+		lastTouch = e.changedTouches[0];
+		e.stopPropagation();
+	}
+
+	function touchEnd() {
+		lastTouch = null;
 	}
 
 	function removeColor() {
@@ -74,35 +93,55 @@
 	}
 </script>
 
-<svelte:window onpointermove={drag} onpointerup={stopDragging} />
+<svelte:window
+	onmousemove={(event) => {
+		if (event.buttons === 1) {
+			drag(event.movementX);
+		}
+	}}
+	onpointerup={stopDragging}
+/>
 
 <div class="grid grid-cols-3 gap-x-2 gap-y-4 rounded-md bg-mist-100 p-4 dark:bg-mist-950">
 	<div
-		class="relative col-span-3 mb-4 h-3 w-full rounded-full border border-mist-300 select-none dark:border-mist-700"
+		class="relative col-span-3 mb-4 h-3 w-full rounded-full border border-mist-300 outline-indigo-800 select-none focus:outline-2 dark:border-mist-700"
 		style:background={gradient.getCssString(90)}
 		bind:clientWidth={gradientContainerWidth}
+		ontouchmove={touch}
+		ontouchend={touchEnd}
+		role="slider"
+		aria-valuenow={activeColor.position}
+		aria-valuemin="0"
+		aria-valuemax="1"
+		tabindex="0"
+		onkeydown={(event) => colorKeyMove(event)}
 	>
-		{#each gradient.colors as color, i (color.id)}
+		{#each gradient.colors as color (color.id)}
 			<div
 				class={[
-					'absolute -top-2 h-6 w-6 cursor-pointer rounded-full border border-mist-300 outline-mist-200 transition-transform duration-150 ease-in-out select-none hover:scale-115 focus:outline-2 dark:border-mist-700 dark:outline-indigo-800',
+					'absolute -top-2 h-6 w-6 cursor-pointer rounded-full border border-mist-300 outline-indigo-800 transition-transform duration-150 ease-in-out select-none hover:scale-115 focus:outline-2 dark:border-mist-700',
 					{ 'scale-115': activeColor === color }
 				]}
 				style:background={color.cssColor}
 				style:left={`${lerp(-1, thumbOffset, color.position)}px`}
 				role="button"
 				bind:clientWidth={thumbWidth}
-				tabindex={i + 1}
+				tabindex="0"
 				onpointerdown={(event) => startDragging(event, color)}
 				onclick={() => activateColor(color)}
-				onkeydown={(event) => colorKeyDown(event, color)}
+				onkeydown={(event) => colorKeyActivate(event, color)}
 			></div>
 		{/each}
 	</div>
 
-	<Button onclick={() => gradient.addColor()}>Randomize</Button>
-	<Button onclick={() => gradient.addColor()}>Add color</Button>
-	<Button theme="danger" onclick={removeColor} disabled={gradient.colors.length < 3}>
+	<Button class="col-span-3 sm:col-span-1" onclick={() => gradient.addColor()}>Randomize</Button>
+	<Button class="col-span-3 sm:col-span-1" onclick={() => gradient.addColor()}>Add color</Button>
+	<Button
+		class="col-span-3 sm:col-span-1"
+		theme="danger"
+		onclick={removeColor}
+		disabled={gradient.colors.length < 3}
+	>
 		Remove color
 	</Button>
 
@@ -121,7 +160,7 @@
 	</label>
 
 	<label>
-		Gradient position
+		Position
 		<Input type="number" min="0" max="100" bind:value={activeColor.positionPercent} />
 	</label>
 

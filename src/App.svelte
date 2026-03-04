@@ -32,17 +32,15 @@
 				</section>
 
 				<section class="mb-4">
-					<h2 class="mb-4 text-xl">Cubemap diagram</h2>
-					<div class="flex items-center justify-center">
-						<CubemapDiagram class="h-3/4 w-md" {cubemapTexture} />
-					</div>
+					<h2 class="mb-4 text-xl">Cubemap texture</h2>
+					<CubemapDiagram class="h-3/4 w-md" {cubemapTexture} />
 				</section>
 			</div>
 
 			<div class="lg:relative lg:flex-4">
 				<div class="sticky top-24">
 					<h2 class="mb-4 text-xl">3D preview</h2>
-					<SkyboxScene class="w-full" {cubemapTexture} />
+					<SkyboxScene {cubemapTexture} />
 				</div>
 			</div>
 		</div>

@@ -14,12 +14,11 @@
 
 	interface Props {
 		cubemapTexture: CubemapTexture | null;
-		class?: string;
 	}
 
 	type Texture = CubeTexture<ImageData>;
 
-	const { cubemapTexture, ...props }: Props = $props();
+	const { cubemapTexture }: Props = $props();
 	let cubeTexture: Texture | null = null;
 	let camera: PerspectiveCamera | null = null;
 	let scene: Scene | null = null;
@@ -75,7 +74,7 @@
 		let lastTime = 0;
 
 		function draw(time: DOMHighResTimeStamp) {
-			// seconds
+			// fraction of second
 			time *= 0.001;
 			const dt = time - lastTime;
 			lastTime = time;
@@ -89,4 +88,14 @@
 	}
 </script>
 
-<canvas class={props.class} width="800" height="600" {@attach setupScene}></canvas>
+<canvas
+	class="mb-2 w-full rounded-md border border-mist-300 dark:border-mist-700"
+	width="800"
+	height="600"
+	{@attach setupScene}
+></canvas>
+
+<p class="text-sm">
+	You can rotate camera by clicking and dragging in the scene. You can also zoom with scroll wheel
+	or gestures.
+</p>
