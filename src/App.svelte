@@ -29,14 +29,14 @@
 	<article class="m-4">
 		<section class="mb-4 text-lg">
 			<header class="mb-4 flex justify-between">
-				<h1 class="text-3xl">Skybox builder</h1>
+				<h1 class="text-2xl md:text-3xl">Skybox builder</h1>
 				{#if file}
 					<a
-						class="rounded-md bg-indigo-700 px-4 py-2 text-white hover:cursor-pointer hover:bg-indigo-800 focus:shadow-md focus:shadow-indigo-800/80 focus:outline-0 disabled:cursor-not-allowed disabled:bg-indigo-950"
+						class="rounded-md bg-indigo-700 px-2 py-2 text-white hover:cursor-pointer hover:bg-indigo-800 focus:shadow-md focus:shadow-indigo-800/80 focus:outline-0 disabled:cursor-not-allowed disabled:bg-indigo-950 md:px-4"
 						href={fileUrl}
 						download="cubemap.png"
 					>
-						Download cubemap texture
+						Download texture
 					</a>
 				{/if}
 			</header>

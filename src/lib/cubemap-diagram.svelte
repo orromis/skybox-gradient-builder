@@ -93,11 +93,11 @@
 		spritesheet).
 	</p>
 	<p class="mb-2">You can hover over cube faces to highlight them:</p>
-	<p class="mb-4">
+	<div class="mb-4 flex flex-wrap">
 		{#each cubemapTexture.textures as face}
 			{@render faceLabel(face.label, { x: face.x, y: face.y })}
 		{/each}
-	</p>
+	</div>
 	<div class="flex items-center justify-center">
 		<canvas
 			class={{ 'h-3/4 w-md': orientation === 'cube', 'h-60': orientation === 'spritesheet' }}
@@ -109,7 +109,7 @@
 
 {#snippet faceLabel(label: string, coords: Coords)}
 	<span
-		class="cursor-help rounded-sm border border-transparent bg-mist-300 p-1 whitespace-nowrap hover:border-violet-800 dark:bg-mist-950"
+		class="mb-2 cursor-help rounded-sm border border-transparent bg-mist-300 p-1 whitespace-nowrap hover:border-violet-800 dark:bg-mist-950"
 		onmouseenter={() => (highlightedCoords = coords)}
 		onmouseleave={() => (highlightedCoords = null)}
 		role="none">{label}</span
