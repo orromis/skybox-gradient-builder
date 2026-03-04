@@ -28,11 +28,19 @@
 			return;
 		}
 
+		// nx and px are swapped probably because of this:
+		// https://github.com/mrdoob/three.js/blob/8886ab6e95f4b06945ffb5d19c531c09dc6c5ce7/src/renderers/WebGLCubeRenderTarget.js#L47
+		const textures = [
+			cubemapTexture.textures[1],
+			cubemapTexture.textures[0],
+			...cubemapTexture.textures.slice(2)
+		];
+
 		if (!cubeTexture) {
-			cubeTexture = new CubeTexture(cubemapTexture.textures.map((t) => t.data));
+			cubeTexture = new CubeTexture(textures.map((t) => t.data));
 			cubeTexture.needsUpdate = true;
 		} else {
-			cubeTexture.images = cubemapTexture.textures.map((t) => t.data);
+			cubeTexture.images = textures.map((t) => t.data);
 			cubeTexture.needsUpdate = true;
 		}
 
@@ -88,6 +96,7 @@
 	}
 </script>
 
+<h2 class="mb-4 text-xl">3D preview</h2>
 <canvas
 	class="mb-2 w-full rounded-md border border-mist-300 dark:border-mist-700"
 	width="800"
@@ -95,7 +104,7 @@
 	{@attach setupScene}
 ></canvas>
 
-<p class="text-sm">
+<p class="text-center text-sm">
 	You can rotate camera by clicking and dragging in the scene. You can also zoom with scroll wheel
 	or gestures.
 </p>

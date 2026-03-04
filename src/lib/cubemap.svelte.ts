@@ -2,7 +2,7 @@ import { Vector3 } from 'three';
 import { Gradient } from './gradient/gradient.svelte';
 
 export interface CubemapTexture {
-	textures: { data: ImageData; x: number; y: number }[];
+	textures: { data: ImageData; x: number; y: number; label: string }[];
 	size: number;
 }
 
@@ -10,41 +10,39 @@ export class Cubemap {
 	constructor(public gradient: Gradient) {}
 
 	// based on https://github.com/StereoKit/StereoKit/blob/ed45314218102da2d1952e51aca544c6e5409509/StereoKitC/asset_types/texture.cpp#L1366
-	drawTexture(size: number) {
+	generateTexture(size: number) {
 		const gradientDir = this.gradient.direction;
-		const faces: { x: number; y: number; index: number }[] = [
-			// nx and px are swapped probably because of this:
-			// https://github.com/mrdoob/three.js/blob/8886ab6e95f4b06945ffb5d19c531c09dc6c5ce7/src/renderers/WebGLCubeRenderTarget.js#L47
-			{ x: 0, y: 1, index: 1 }, // nx
-			{ x: 2, y: 1, index: 0 }, // px
-			{ x: 1, y: 0, index: 2 }, // py
-			{ x: 1, y: 2, index: 3 }, // ny
-			{ x: 1, y: 1, index: 4 }, // pz
-			{ x: 3, y: 1, index: 5 } // nz
+		const faces = [
+			{ label: '+X axis', x: 2, y: 1 }, // px
+			{ label: '-X axis', x: 0, y: 1 }, // nx
+			{ label: '+Y axis', x: 1, y: 0 }, // py
+			{ label: '-Y axis', x: 1, y: 2 }, // ny
+			{ label: '+Z axis', x: 1, y: 1 }, // pz
+			{ label: '-Z axis', x: 3, y: 1 } // nz
 		];
 		const textureData: CubemapTexture = { size, textures: [] };
 
-		for (const face of faces) {
+		for (const [i, face] of faces.entries()) {
 			const imageData = new ImageData(size, size);
 
 			// points are in the following order
 			// p3  p4
 			// p2  p1
-			const p1 = this.#cubemapCorner(face.index * 4);
-			const p2 = this.#cubemapCorner(face.index * 4 + 1);
-			const p3 = this.#cubemapCorner(face.index * 4 + 2);
-			const p4 = this.#cubemapCorner(face.index * 4 + 3);
+			const p1 = this.#cubemapCorner(i * 4);
+			const p2 = this.#cubemapCorner(i * 4 + 1);
+			const p3 = this.#cubemapCorner(i * 4 + 2);
+			const p4 = this.#cubemapCorner(i * 4 + 3);
 
 			for (let y = 0; y < size; y++) {
 				let yPosition = 1 - y / size;
-				if (face.index == 2) {
+				if (i == 2) {
 					yPosition = 1 - yPosition;
 				}
 
 				for (let x = 0; x < size; x++) {
 					let xPosition = 1 - x / size;
 
-					if (face.index == 2) {
+					if (i == 2) {
 						xPosition = 1 - xPosition;
 					}
 
@@ -64,7 +62,7 @@ export class Cubemap {
 					}
 				}
 			}
-			textureData.textures.push({ data: imageData, x: face.x, y: face.y });
+			textureData.textures.push({ data: imageData, label: face.label, x: face.x, y: face.y });
 		}
 
 		return textureData;

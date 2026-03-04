@@ -14,32 +14,48 @@
 	);
 
 	let textureSize = $state(64);
-	const cubemapTexture = $derived(new Cubemap(gradient).drawTexture(textureSize));
+	let cubemapTexture = $derived(new Cubemap(gradient).generateTexture(textureSize));
+	let file: Blob | null = $state(null);
+	let fileUrl = $derived.by(() => {
+		if (!file) {
+			return null;
+		}
+
+		return URL.createObjectURL(file);
+	});
 </script>
 
 <main class="container mx-auto">
 	<article class="m-4">
 		<section class="mb-4 text-lg">
-			<header class="mb-4 text-3xl"><h1>Skybox builder</h1></header>
+			<header class="mb-4 flex justify-between">
+				<h1 class="text-3xl">Skybox builder</h1>
+				{#if file}
+					<a
+						class="rounded-md bg-indigo-700 px-4 py-2 text-white hover:cursor-pointer hover:bg-indigo-800 focus:shadow-md focus:shadow-indigo-800/80 focus:outline-0 disabled:cursor-not-allowed disabled:bg-indigo-950"
+						href={fileUrl}
+						download="cubemap.png"
+					>
+						Download cubemap texture
+					</a>
+				{/if}
+			</header>
 			<p>This tools generates gradient cubemap texture and renders it in 3D.</p>
 		</section>
 
 		<div class="lg:flex">
 			<div class="mr-4 lg:flex-3">
 				<section class="mb-4">
-					<h2 class="mb-4 text-xl">Texture and gradient settings</h2>
 					<GradientPicker bind:gradient />
 				</section>
 
 				<section class="mb-4">
-					<h2 class="mb-4 text-xl">Cubemap texture</h2>
-					<CubemapDiagram class="h-3/4 w-md" {cubemapTexture} />
+					<CubemapDiagram bind:file {cubemapTexture} />
 				</section>
 			</div>
 
 			<div class="lg:relative lg:flex-4">
 				<div class="sticky top-24">
-					<h2 class="mb-4 text-xl">3D preview</h2>
 					<SkyboxScene {cubemapTexture} />
 				</div>
 			</div>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { texture } from 'three/tsl';
 	import { type CubemapTexture } from './cubemap.svelte';
 
 	interface Coords {
@@ -6,13 +7,22 @@
 		y: number;
 	}
 
-	const { cubemapTexture, ...props }: { cubemapTexture: CubemapTexture; class?: string } = $props();
+	let {
+		cubemapTexture,
+		file = $bindable(null)
+	}: { cubemapTexture: CubemapTexture; file: Blob | null } = $props();
 	let contextUnavailable = $state(false);
 	let highlightedCoords: Coords | null = $state(null);
+	let orientation = $state<'cube' | 'spritesheet'>('cube');
 
 	function attachCanvas(canvas: HTMLCanvasElement) {
-		canvas.width = cubemapTexture.size * 4;
-		canvas.height = cubemapTexture.size * 3;
+		if (orientation === 'cube') {
+			canvas.width = cubemapTexture.size * 4;
+			canvas.height = cubemapTexture.size * 3;
+		} else {
+			canvas.width = cubemapTexture.size;
+			canvas.height = cubemapTexture.size * 6;
+		}
 		const context = canvas.getContext('2d');
 		const styles = getComputedStyle(document.documentElement);
 		const highlightColor = styles.getPropertyValue('--color-violet-800');
@@ -24,38 +34,76 @@
 
 		context.clearRect(0, 0, canvas.width, canvas.height);
 
-		for (const texture of cubemapTexture.textures) {
-			const x = texture.x * cubemapTexture.size;
-			const y = texture.y * cubemapTexture.size;
+		for (const [i, texture] of cubemapTexture.textures.entries()) {
+			let x = 0;
+			let y = 0;
+
+			if (orientation === 'cube') {
+				x = texture.x * cubemapTexture.size;
+				y = texture.y * cubemapTexture.size;
+			} else {
+				x = 0;
+				y = i * cubemapTexture.size;
+			}
 			context.putImageData(texture.data, x, y);
 
 			if (highlightedCoords?.x === texture.x && highlightedCoords?.y === texture.y) {
 				context.strokeStyle = highlightColor;
+				context.lineWidth = 2;
 				context.strokeRect(x, y, cubemapTexture.size, cubemapTexture.size);
 			}
 		}
+
+		canvas.toBlob((blob) => (file = blob));
 	}
 </script>
 
+<div class="mb-4 flex items-center justify-between">
+	<h2 class="text-xl">Cubemap texture</h2>
+
+	<span>
+		<button
+			class={[
+				'cursor-pointer rounded-l-md border border-indigo-800 bg-indigo-100 p-2 text-black hover:bg-indigo-200 focus:shadow-md focus:shadow-indigo-800/80 focus:outline-0 [&.is-active]:bg-indigo-700 [&.is-active]:text-white',
+				{ 'is-active': orientation === 'cube' }
+			]}
+			onclick={() => (orientation = 'cube')}
+		>
+			Cube
+		</button><button
+			class={[
+				'cursor-pointer rounded-r-md border border-indigo-800 bg-indigo-100 p-2 text-black hover:bg-indigo-200 focus:shadow-md focus:shadow-indigo-800/80 focus:outline-0 [&.is-active]:bg-indigo-700 [&.is-active]:text-white',
+				{ 'is-active': orientation === 'spritesheet' }
+			]}
+			onclick={() => (orientation = 'spritesheet')}
+		>
+			Spritesheet
+		</button>
+	</span>
+</div>
+
 {#if contextUnavailable}
-	<div class={['flex items-center justify-center', props.class]}>
+	<div class="flex h-3/4 w-md items-center justify-center">
 		<p>Your browser is not supported.</p>
 	</div>
 {:else}
 	<p class="mb-2">
-		This is the cubemap texture with the gradient projected on each face of the cube.
+		This is the cubemap texture with the gradient projected on each face of the cube. You can
+		download it with the button above. It will be downloaded in the selected format (cube or
+		spritesheet).
 	</p>
-	<p class="mb-2">
-		<span class="mb-1 inline-block">Faces are in the following order:</span>
-		{@render faceLabel('+Y axis', { x: 1, y: 0 })}
-		{@render faceLabel('-X axis', { x: 0, y: 1 })}
-		{@render faceLabel('+Z axis', { x: 1, y: 1 })}
-		{@render faceLabel('+X axis', { x: 2, y: 1 })}
-		{@render faceLabel('-Z axis', { x: 3, y: 1 })}
-		{@render faceLabel('-Y axis', { x: 1, y: 2 })}
+	<p class="mb-2">You can hover over cube faces to highlight them:</p>
+	<p class="mb-4">
+		{#each cubemapTexture.textures as face}
+			{@render faceLabel(face.label, { x: face.x, y: face.y })}
+		{/each}
 	</p>
 	<div class="flex items-center justify-center">
-		<canvas class={props.class} {@attach attachCanvas}> </canvas>
+		<canvas
+			class={{ 'h-3/4 w-md': orientation === 'cube', 'h-60': orientation === 'spritesheet' }}
+			{@attach attachCanvas}
+		>
+		</canvas>
 	</div>
 {/if}
 
@@ -65,5 +113,5 @@
 		onmouseenter={() => (highlightedCoords = coords)}
 		onmouseleave={() => (highlightedCoords = null)}
 		role="none">{label}</span
-	>
+	>&nbsp;
 {/snippet}

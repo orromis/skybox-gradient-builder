@@ -3,6 +3,7 @@ import { clamp, lerp } from '../utils';
 import { Vector3 } from 'three';
 
 let counter = 0;
+const MAX_COLORS = 15;
 
 export class GradientColor {
 	rgb: RgbaColor;
@@ -60,11 +61,19 @@ export class Gradient {
 	constructor(colors: GradientColor[], angle: number = 180) {
 		this.colors = $state(colors);
 		this.angle = $state(angle);
+
+		$effect(() => {
+			this.colors.sort((a, b) => a.position - b.position);
+		});
 	}
 
 	get direction() {
 		const angleRad = (Math.PI / 180) * this.angle;
 		return new Vector3(0, 1, 0).applyAxisAngle({ x: 0, y: 0, z: 1 }, angleRad);
+	}
+
+	get limit() {
+		return MAX_COLORS - this.colors.length;
 	}
 
 	sample(samplePosition: number) {
@@ -111,26 +120,30 @@ export class Gradient {
 		return `linear-gradient(${angleOverride}deg, ${gradientColors.join(',')})`;
 	}
 
+	canAddColor() {
+		return MAX_COLORS > this.colors.length;
+	}
+
 	addColor() {
+		if (!this.canAddColor()) {
+			return;
+		}
+
 		const r = Math.floor(Math.random() * 255);
 		const g = Math.floor(Math.random() * 255);
 		const b = Math.floor(Math.random() * 255);
 
 		this.colors.push(new GradientColor({ r, g, b, a: 1 }, Math.random()));
-		this.sortColors();
 	}
 
 	removeColor(color: GradientColor) {
 		const index = this.colors.indexOf(color);
+
 		if (index !== -1) {
 			this.colors.splice(index, 1);
 			return index;
 		}
 
 		return false;
-	}
-
-	sortColors() {
-		this.colors.sort((a, b) => a.position - b.position);
 	}
 }

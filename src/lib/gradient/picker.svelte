@@ -86,7 +86,6 @@
 
 	function removeColor() {
 		const index = gradient.removeColor(activeColor);
-
 		if (index) {
 			activeColor = gradient.colors[index + 1] ?? gradient.colors[index - 1];
 		}
@@ -102,9 +101,10 @@
 	onpointerup={stopDragging}
 />
 
-<div class="grid grid-cols-3 gap-x-2 gap-y-4 rounded-md bg-mist-100 p-4 dark:bg-mist-950">
+<h2 class="mb-4 text-xl">Texture and gradient settings</h2>
+<div class="grid grid-cols-4 gap-x-2 gap-y-4 rounded-md bg-mist-100 p-4 dark:bg-mist-950">
 	<div
-		class="relative col-span-3 mb-4 h-3 w-full rounded-full border border-mist-300 outline-indigo-800 select-none focus:outline-2 dark:border-mist-700"
+		class="relative col-span-4 h-3 w-full rounded-full border border-mist-300 outline-indigo-800 select-none focus:outline-2 dark:border-mist-700"
 		style:background={gradient.getCssString(90)}
 		bind:clientWidth={gradientContainerWidth}
 		ontouchmove={touch}
@@ -133,11 +133,16 @@
 			></div>
 		{/each}
 	</div>
+	<div class="col-span-4 -mt-2 text-right text-sm">{gradient.limit}</div>
 
-	<Button class="col-span-3 sm:col-span-1" onclick={() => gradient.addColor()}>Randomize</Button>
-	<Button class="col-span-3 sm:col-span-1" onclick={() => gradient.addColor()}>Add color</Button>
+	<!-- <Button class="col-span-4 sm:col-span-1" onclick={() => gradient.addColor()}>Randomize</Button> -->
 	<Button
-		class="col-span-3 sm:col-span-1"
+		class="col-span-4 sm:col-span-2"
+		onclick={() => gradient.addColor()}
+		disabled={!gradient.canAddColor()}>Add color</Button
+	>
+	<Button
+		class="col-span-4 sm:col-span-2"
 		theme="danger"
 		onclick={removeColor}
 		disabled={gradient.colors.length < 3}
@@ -145,7 +150,7 @@
 		Remove color
 	</Button>
 
-	<label class="relative col-span-2">
+	<label class="relative col-span-3">
 		Selected color
 		<Input type="text" bind:value={activeColor.hexColor} />
 
@@ -164,7 +169,7 @@
 		<Input type="number" min="0" max="100" bind:value={activeColor.positionPercent} />
 	</label>
 
-	<div class="slider col-span-2">
+	<div class="slider col-span-3">
 		<p class="mb-2" id="angle">Gradient angle</p>
 		<Slider bind:value={gradient.angle} min="0" max="360" step="1" ariaLabelledBy="angle" />
 	</div>
@@ -177,7 +182,7 @@
 		aria-labelledby="angle"
 	/>
 	<div
-		class="col-span-3 h-30 rounded-md border border-mist-300 dark:border-mist-700"
+		class="col-span-4 h-30 rounded-md border border-mist-300 dark:border-mist-700"
 		style:background={gradient.getCssString()}
 	></div>
 </div>
