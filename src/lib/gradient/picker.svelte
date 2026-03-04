@@ -43,16 +43,12 @@
 		activeColor = color;
 	}
 
-	function activateColor(color: GradientColor) {
-		activeColor = color;
-	}
-
 	function colorKeyActivate(event: KeyboardEvent, color: GradientColor) {
 		switch (event.key) {
 			case 'Enter':
 			case ' ':
 			case 'Spacebar':
-				activateColor(color);
+				activeColor = color;
 				return;
 		}
 
@@ -77,11 +73,6 @@
 			drag(e.changedTouches[0].pageX - lastTouch.pageX);
 		}
 		lastTouch = e.changedTouches[0];
-		e.stopPropagation();
-	}
-
-	function touchEnd() {
-		lastTouch = null;
 	}
 
 	function removeColor() {
@@ -92,14 +83,7 @@
 	}
 </script>
 
-<svelte:window
-	onmousemove={(event) => {
-		if (event.buttons === 1) {
-			drag(event.movementX);
-		}
-	}}
-	onpointerup={stopDragging}
-/>
+<svelte:window onmousemove={(event) => drag(event.movementX)} onpointerup={stopDragging} />
 
 <h2 class="mb-4 text-xl">Texture and gradient settings</h2>
 <div class="grid grid-cols-4 gap-x-2 gap-y-4 rounded-md bg-mist-100 p-4 dark:bg-mist-950">
@@ -108,7 +92,7 @@
 		style:background={gradient.getCssString(90)}
 		bind:clientWidth={gradientContainerWidth}
 		ontouchmove={touch}
-		ontouchend={touchEnd}
+		ontouchend={() => (lastTouch = null)}
 		role="slider"
 		aria-valuenow={activeColor.position}
 		aria-valuemin="0"
@@ -128,7 +112,7 @@
 				bind:clientWidth={thumbWidth}
 				tabindex="0"
 				onpointerdown={(event) => startDragging(event, color)}
-				onclick={() => activateColor(color)}
+				onclick={() => (activeColor = color)}
 				onkeydown={(event) => colorKeyActivate(event, color)}
 			></div>
 		{/each}
@@ -190,8 +174,8 @@
 <style>
 	.color-picker {
 		--cp-bg-color: var(--color-mist-100);
-		--cp-border-color: transparent;
-		--cp-text-color: black;
+		--cp-border-color: var(--color-transpar);
+		--cp-text-color: var(--color-black);
 		--cp-input-color: var(--color-mist-200);
 		--cp-button-hover-color: var(--color-mist-300);
 		--focus-color: var(--color-indigo-800);
@@ -199,7 +183,7 @@
 		@media (prefers-color-scheme: dark) {
 			--cp-bg-color: var(--color-mist-950);
 			--cp-border-color: transparent;
-			--cp-text-color: white;
+			--cp-text-color: var(--color-white);
 			--cp-input-color: var(--color-mist-900);
 			--cp-button-hover-color: var(--color-mist-700);
 		}

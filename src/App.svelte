@@ -13,7 +13,7 @@
 		])
 	);
 
-	let textureSize = $state(64);
+	let textureSize = $state(128);
 	let cubemapTexture = $derived(new Cubemap(gradient).generateTexture(textureSize));
 	let file: Blob | null = $state(null);
 	let fileUrl = $derived.by(() => {

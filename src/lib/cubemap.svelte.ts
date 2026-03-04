@@ -21,6 +21,7 @@ export class Cubemap {
 			{ label: '-Z axis', x: 3, y: 1 } // nz
 		];
 		const textureData: CubemapTexture = { size, textures: [] };
+		const sampler = this.gradient.getSampler();
 
 		for (const [i, face] of faces.entries()) {
 			const imageData = new ImageData(size, size);
@@ -51,7 +52,7 @@ export class Cubemap {
 					const left = new Vector3().lerpVectors(p2, p3, yPosition);
 					const point = new Vector3().lerpVectors(right, left, xPosition);
 					const pointGradientPosition = (point.normalize().dot(gradientDir) + 1) * 0.5;
-					const sample = this.gradient.sample(pointGradientPosition);
+					const sample = sampler.sample(pointGradientPosition);
 
 					if (sample) {
 						const stride = (x + y * size) * 4;

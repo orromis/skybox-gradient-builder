@@ -76,41 +76,6 @@ export class Gradient {
 		return MAX_COLORS - this.colors.length;
 	}
 
-	sample(samplePosition: number) {
-		let colorLeft: GradientColor | null = null;
-		let colorRight: GradientColor | null = null;
-		const t = clamp(samplePosition, 0, 1);
-
-		// find the gradient colors that are closest to the sampled position
-		for (let i = 0; i < this.colors.length; i++) {
-			const color = this.colors[i];
-			const position = color.position;
-
-			if (position <= t) {
-				colorLeft = color;
-			} else if (position >= t) {
-				colorRight = color;
-				break;
-			}
-		}
-
-		if (colorLeft && colorRight) {
-			const position = colorLeft.position;
-			const nextPosition = colorRight.position;
-			const localT = (t - position) / (nextPosition - position);
-			const r = lerp(colorLeft.rgb.r, colorRight.rgb.r, localT);
-			const g = lerp(colorLeft.rgb.g, colorRight.rgb.g, localT);
-			const b = lerp(colorLeft.rgb.b, colorRight.rgb.b, localT);
-			const a = lerp(colorLeft.rgb.a, colorRight.rgb.a, localT);
-
-			return { r, g, b, a } as RgbaColor;
-		} else if (colorLeft) {
-			return colorLeft.rgb;
-		} else if (colorRight) {
-			return colorRight.rgb;
-		}
-	}
-
 	getCssString(angleOverride = this.angle) {
 		const gradientColors = [];
 		for (const color of this.colors) {
@@ -145,5 +110,61 @@ export class Gradient {
 		}
 
 		return false;
+	}
+
+	getSampler() {
+		// sampler copies the colors, breaking away from svelte state and it's overhead
+		// this speeds up texture generation when sampling pixels for the texture
+		return new GradientSampler(
+			this.colors.map(({ rgb, position }) => ({ rgb: { ...rgb }, position }))
+		);
+	}
+}
+
+interface StrippedColor {
+	rgb: RgbaColor;
+	position: number;
+}
+
+export class GradientSampler {
+	#colors: StrippedColor[];
+
+	constructor(colors: StrippedColor[]) {
+		this.#colors = colors;
+	}
+
+	sample(samplePosition: number) {
+		let colorLeft: StrippedColor | null = null;
+		let colorRight: StrippedColor | null = null;
+		const t = clamp(samplePosition, 0, 1);
+
+		// find the gradient colors that are closest to the sampled position
+		for (let i = 0; i < this.#colors.length; i++) {
+			const color = this.#colors[i];
+			const position = color.position;
+
+			if (position <= t) {
+				colorLeft = color;
+			} else if (position >= t) {
+				colorRight = color;
+				break;
+			}
+		}
+
+		if (colorLeft && colorRight) {
+			const position = colorLeft.position;
+			const nextPosition = colorRight.position;
+			const localT = (t - position) / (nextPosition - position);
+			const r = lerp(colorLeft.rgb.r, colorRight.rgb.r, localT);
+			const g = lerp(colorLeft.rgb.g, colorRight.rgb.g, localT);
+			const b = lerp(colorLeft.rgb.b, colorRight.rgb.b, localT);
+			const a = lerp(colorLeft.rgb.a, colorRight.rgb.a, localT);
+
+			return { r, g, b, a } as RgbaColor;
+		} else if (colorLeft) {
+			return colorLeft.rgb;
+		} else if (colorRight) {
+			return colorRight.rgb;
+		}
 	}
 }

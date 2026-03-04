@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { texture } from 'three/tsl';
 	import { type CubemapTexture } from './cubemap.svelte';
 
 	interface Coords {
@@ -97,7 +96,7 @@
 		to highlight the face on the texture:
 	</p>
 	<div class="mb-4 flex flex-wrap">
-		{#each cubemapTexture.textures as face}
+		{#each cubemapTexture.textures as face (face.label)}
 			{@render faceLabel(face.label, { x: face.x, y: face.y })}
 		{/each}
 	</div>
