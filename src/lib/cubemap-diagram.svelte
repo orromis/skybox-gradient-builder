@@ -92,7 +92,10 @@
 		download it with the button above. It will be downloaded in the selected format (cube or
 		spritesheet).
 	</p>
-	<p class="mb-2">You can hover over cube faces to highlight them:</p>
+	<p class="mb-2">
+		Each face of the cube corresponds to one axis in the 3D coordinate space. You can hover the axes
+		to highlight the face on the texture:
+	</p>
 	<div class="mb-4 flex flex-wrap">
 		{#each cubemapTexture.textures as face}
 			{@render faceLabel(face.label, { x: face.x, y: face.y })}

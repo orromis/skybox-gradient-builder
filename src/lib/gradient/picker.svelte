@@ -87,7 +87,7 @@
 	function removeColor() {
 		const index = gradient.removeColor(activeColor);
 		if (index) {
-			activeColor = gradient.colors[index + 1] ?? gradient.colors[index - 1];
+			activeColor = gradient.colors[index] ?? gradient.colors[index - 1];
 		}
 	}
 </script>
