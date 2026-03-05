@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ColorPicker, { ChromeVariant } from 'svelte-awesome-color-picker';
 	import { Gradient, GradientColor } from './gradient.svelte';
-	import { clamp, lerp } from '../utils';
+	import { lerp } from '../utils';
 	import { Slider } from 'svelte-awesome-slider';
 	import Button from '../button.svelte';
 	import Input from '../input.svelte';
@@ -26,7 +26,7 @@
 		}
 
 		activePosition += movementX / thumbOffset;
-		activeColor.position = clamp(activePosition, 0, 1);
+		activeColor.position = activePosition;
 	}
 
 	function stopDragging() {
@@ -59,10 +59,10 @@
 	function colorKeyMove(event: KeyboardEvent, color = activeColor) {
 		switch (event.key) {
 			case 'ArrowLeft':
-				color.position = clamp(color.position - 0.01, 0, 1);
+				color.position -= 0.01;
 				break;
 			case 'ArrowRight':
-				color.position = clamp(color.position + 0.01, 0, 1);
+				color.position += color.position;
 				break;
 		}
 	}
@@ -78,7 +78,8 @@
 	function removeColor() {
 		const index = gradient.removeColor(activeColor);
 		if (index) {
-			activeColor = gradient.colors[index] ?? gradient.colors[index - 1];
+			activeColor =
+				gradient.colors[index] ?? gradient.colors[index - 1] ?? gradient.colors[index + 1] ?? null;
 		}
 	}
 </script>
@@ -123,13 +124,13 @@
 	<Button
 		class="col-span-4 sm:col-span-2"
 		onclick={() => gradient.addColor()}
-		disabled={!gradient.canAddColor()}>Add color</Button
+		disabled={!gradient.canAddColor}>Add color</Button
 	>
 	<Button
 		class="col-span-4 sm:col-span-2"
 		theme="danger"
 		onclick={removeColor}
-		disabled={gradient.colors.length < 3}
+		disabled={!gradient.canRemoveColor}
 	>
 		Remove color
 	</Button>

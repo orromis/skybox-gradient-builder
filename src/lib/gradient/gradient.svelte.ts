@@ -2,17 +2,19 @@ import type { RgbaColor } from 'svelte-awesome-color-picker';
 import { clamp, lerp } from '../utils';
 import { Vector3 } from 'three';
 
+export const MAX_COLORS = 15;
+export const MIN_COLORS = 2;
+
 let counter = 0;
-const MAX_COLORS = 15;
 
 export class GradientColor {
 	rgb: RgbaColor;
-	position: number;
+	#position: number;
 	id = counter++;
 
 	constructor(color: RgbaColor, position: number) {
 		this.rgb = $state(color);
-		this.position = $state(position);
+		this.#position = $state(clamp(position, 0, 1));
 	}
 
 	get cssColor() {
@@ -20,9 +22,9 @@ export class GradientColor {
 	}
 
 	get hexColor() {
-		const r = this.rgb.r.toString(16).padStart(2, '0');
-		const g = this.rgb.g.toString(16).padStart(2, '0');
-		const b = this.rgb.b.toString(16).padStart(2, '0');
+		const r = Math.round(this.rgb.r).toString(16).padStart(2, '0');
+		const g = Math.round(this.rgb.g).toString(16).padStart(2, '0');
+		const b = Math.round(this.rgb.b).toString(16).padStart(2, '0');
 		const a =
 			this.rgb.a < 1
 				? Math.round(this.rgb.a * 255)
@@ -30,6 +32,14 @@ export class GradientColor {
 						.padStart(2, '0')
 				: null;
 		return `#${r}${g}${b}${a ?? ''}`;
+	}
+
+	get position() {
+		return this.#position;
+	}
+
+	set position(value: number) {
+		this.#position = clamp(value, 0, 1);
 	}
 
 	set hexColor(color: string) {
@@ -59,7 +69,7 @@ export class Gradient {
 	angle: number;
 
 	constructor(colors: GradientColor[], angle: number = 180) {
-		this.colors = $state(colors);
+		this.colors = $state(colors.slice(0, MAX_COLORS));
 		this.angle = $state(angle);
 
 		$effect(() => {
@@ -76,21 +86,25 @@ export class Gradient {
 		return MAX_COLORS - this.colors.length;
 	}
 
+	get canAddColor() {
+		return MAX_COLORS > this.colors.length;
+	}
+
+	get canRemoveColor() {
+		return this.colors.length > 2;
+	}
+
 	getCssString(angleOverride = this.angle) {
 		const gradientColors = [];
 		for (const color of this.colors) {
 			gradientColors.push(`${color.cssColor} ${color.position * 100}%`);
 		}
 
-		return `linear-gradient(${angleOverride}deg, ${gradientColors.join(',')})`;
-	}
-
-	canAddColor() {
-		return MAX_COLORS > this.colors.length;
+		return `linear-gradient(${angleOverride}deg,${gradientColors.join(',')})`;
 	}
 
 	addColor() {
-		if (!this.canAddColor()) {
+		if (!this.canAddColor) {
 			return;
 		}
 
@@ -102,6 +116,10 @@ export class Gradient {
 	}
 
 	removeColor(color: GradientColor) {
+		if (!this.canRemoveColor) {
+			return false;
+		}
+
 		const index = this.colors.indexOf(color);
 
 		if (index !== -1) {
@@ -166,5 +184,7 @@ export class GradientSampler {
 		} else if (colorRight) {
 			return colorRight.rgb;
 		}
+
+		return null;
 	}
 }

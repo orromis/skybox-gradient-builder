@@ -1,34 +1,35 @@
 import { Vector3 } from 'three';
-import { Gradient } from './gradient/gradient.svelte';
+import { type Gradient } from './gradient/gradient.svelte';
 
 export interface CubemapTexture {
 	textures: { data: ImageData; x: number; y: number; label: string }[];
 	size: number;
 }
 
+export const FACES = [
+	{ label: '+X axis', x: 2, y: 1 },
+	{ label: '-X axis', x: 0, y: 1 },
+	{ label: '+Y axis', x: 1, y: 0 },
+	{ label: '-Y axis', x: 1, y: 2 },
+	{ label: '+Z axis', x: 1, y: 1 },
+	{ label: '-Z axis', x: 3, y: 1 }
+];
+
 export class Cubemap {
-	constructor(public gradient: Gradient) {}
+	constructor(public gradient: Pick<Gradient, 'direction' | 'getSampler'>) {}
 
 	// based on https://github.com/StereoKit/StereoKit/blob/ed45314218102da2d1952e51aca544c6e5409509/StereoKitC/asset_types/texture.cpp#L1366
 	generateTexture(size: number) {
 		const gradientDir = this.gradient.direction;
-		const faces = [
-			{ label: '+X axis', x: 2, y: 1 }, // px
-			{ label: '-X axis', x: 0, y: 1 }, // nx
-			{ label: '+Y axis', x: 1, y: 0 }, // py
-			{ label: '-Y axis', x: 1, y: 2 }, // ny
-			{ label: '+Z axis', x: 1, y: 1 }, // pz
-			{ label: '-Z axis', x: 3, y: 1 } // nz
-		];
 		const textureData: CubemapTexture = { size, textures: [] };
 		const sampler = this.gradient.getSampler();
 
-		for (const [i, face] of faces.entries()) {
+		for (const [i, face] of FACES.entries()) {
 			const imageData = new ImageData(size, size);
 
 			// points are in the following order
-			// p3  p4
-			// p2  p1
+			// p4  p3
+			// p1  p2
 			const p1 = this.#cubemapCorner(i * 4);
 			const p2 = this.#cubemapCorner(i * 4 + 1);
 			const p3 = this.#cubemapCorner(i * 4 + 2);
@@ -36,6 +37,7 @@ export class Cubemap {
 
 			for (let y = 0; y < size; y++) {
 				let yPosition = 1 - y / size;
+
 				if (i == 2) {
 					yPosition = 1 - yPosition;
 				}
@@ -48,10 +50,10 @@ export class Cubemap {
 					}
 
 					// locate current pixel in the gradient
-					const right = new Vector3().lerpVectors(p1, p4, yPosition);
-					const left = new Vector3().lerpVectors(p2, p3, yPosition);
-					const point = new Vector3().lerpVectors(right, left, xPosition);
-					const pointGradientPosition = (point.normalize().dot(gradientDir) + 1) * 0.5;
+					const left = new Vector3().lerpVectors(p1, p4, yPosition);
+					const right = new Vector3().lerpVectors(p2, p3, yPosition);
+					const pixel = new Vector3().lerpVectors(left, right, xPosition);
+					const pointGradientPosition = (pixel.normalize().dot(gradientDir) + 1) * 0.5;
 					const sample = sampler.sample(pointGradientPosition);
 
 					if (sample) {

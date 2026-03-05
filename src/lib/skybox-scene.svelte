@@ -106,5 +106,5 @@
 
 <p class="text-center text-sm">
 	You can rotate camera by clicking and dragging in the scene. You can also zoom with scroll wheel
-	or gestures.
+	or gestures (on touch devices).
 </p>
