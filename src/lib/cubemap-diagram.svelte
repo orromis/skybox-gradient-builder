@@ -48,7 +48,7 @@
 
 			if (highlightedCoords?.x === texture.x && highlightedCoords?.y === texture.y) {
 				context.strokeStyle = highlightColor;
-				context.lineWidth = 2;
+				context.lineWidth = orientation === 'cube' ? 2 : 8;
 				context.strokeRect(x, y, cubemapTexture.size, cubemapTexture.size);
 			}
 		}
