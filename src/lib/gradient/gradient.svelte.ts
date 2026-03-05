@@ -12,6 +12,8 @@ export class GradientColor {
 	#position: number;
 	id = counter++;
 
+	#invalidHex: string | null = $state(null);
+
 	constructor(color: RgbaColor, position: number) {
 		this.rgb = $state(color);
 		this.#position = $state(clamp(position, 0, 1));
@@ -22,6 +24,10 @@ export class GradientColor {
 	}
 
 	get hexColor() {
+		if (this.#invalidHex !== null) {
+			return this.#invalidHex;
+		}
+
 		const r = Math.round(this.rgb.r).toString(16).padStart(2, '0');
 		const g = Math.round(this.rgb.g).toString(16).padStart(2, '0');
 		const b = Math.round(this.rgb.b).toString(16).padStart(2, '0');
@@ -51,7 +57,13 @@ export class GradientColor {
 
 			if (parsedColor[4]) {
 				this.rgb.a = parseInt(parsedColor[4], 16) / 255;
+			} else {
+				this.rgb.a = 1;
 			}
+
+			this.#invalidHex = null;
+		} else {
+			this.#invalidHex = color;
 		}
 	}
 
@@ -61,6 +73,11 @@ export class GradientColor {
 
 	set positionPercent(value: number) {
 		this.position = value / 100;
+	}
+
+	resetInvalidHex() {
+		this.#invalidHex = null;
+		console.log(this.hexColor);
 	}
 }
 

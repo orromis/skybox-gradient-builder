@@ -21,8 +21,8 @@ describe('Gradient', () => {
 			color.hexColor = '#ff110a';
 			color2.hexColor = '#FF110A';
 
-			expect(color.rgb).toEqual({ r: 255, g: 17, b: 10, a: 0.5 });
-			expect(color2.rgb).toEqual({ r: 255, g: 17, b: 10, a: 0.5 });
+			expect(color.rgb).toEqual({ r: 255, g: 17, b: 10, a: 1 });
+			expect(color2.rgb).toEqual({ r: 255, g: 17, b: 10, a: 1 });
 		});
 
 		it('should parse hex color with alpha channel', () => {

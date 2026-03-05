@@ -149,7 +149,11 @@
 
 	<label class="relative col-span-3">
 		Selected color
-		<Input type="text" bind:value={activeColor.hexColor} />
+		<Input
+			type="text"
+			bind:value={activeColor.hexColor}
+			onfocusout={() => activeColor.resetInvalidHex()}
+		/>
 
 		<span class="color-picker absolute right-1 bottom-1">
 			<ColorPicker
