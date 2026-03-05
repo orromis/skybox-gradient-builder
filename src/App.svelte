@@ -44,7 +44,7 @@
 		</section>
 
 		<div class="lg:flex">
-			<div class="mr-4 lg:flex-3">
+			<div class="lg:mr-4 lg:flex-3">
 				<section class="mb-4">
 					<GradientPicker bind:gradient />
 				</section>

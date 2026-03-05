@@ -102,7 +102,10 @@
 	</div>
 	<div class="flex items-center justify-center">
 		<canvas
-			class={{ 'h-3/4 w-md': orientation === 'cube', 'h-60': orientation === 'spritesheet' }}
+			class={{
+				'h-3/4 w-full md:w-md': orientation === 'cube',
+				'h-60': orientation === 'spritesheet'
+			}}
 			{@attach attachCanvas}
 		>
 		</canvas>
