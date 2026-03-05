@@ -19,6 +19,7 @@
 	let gradientContainerWidth = $state(0);
 	let thumbWidth = $state(0);
 	let thumbOffset = $derived(gradientContainerWidth - thumbWidth);
+	let focusedColor: GradientColor | null = $state(null);
 
 	function drag(movementX: number) {
 		if (!dragging) {
@@ -62,7 +63,7 @@
 				color.position -= 0.01;
 				break;
 			case 'ArrowRight':
-				color.position += color.position;
+				color.position += 0.01;
 				break;
 		}
 	}
@@ -77,10 +78,18 @@
 
 	function removeColor() {
 		const index = gradient.removeColor(activeColor);
-		if (index) {
+		if (index !== false) {
 			activeColor =
 				gradient.colors[index] ?? gradient.colors[index - 1] ?? gradient.colors[index + 1] ?? null;
 		}
+	}
+
+	function keepColorFocus(color: GradientColor) {
+		return (colorElement: HTMLDivElement) => {
+			if (color.id === focusedColor?.id) {
+				colorElement.focus();
+			}
+		};
 	}
 </script>
 
@@ -101,7 +110,7 @@
 		tabindex="0"
 		onkeydown={(event) => colorKeyMove(event)}
 	>
-		{#each gradient.colors as color (color.id)}
+		{#each gradient.colors as color, i (i)}
 			<div
 				class={[
 					'absolute -top-2 h-6 w-6 cursor-pointer rounded-full border border-mist-300 outline-indigo-800 transition-transform duration-150 ease-in-out select-none hover:scale-115 focus:outline-2 dark:border-mist-700',
@@ -111,10 +120,13 @@
 				style:left={`${lerp(-1, thumbOffset, color.position)}px`}
 				role="button"
 				bind:clientWidth={thumbWidth}
+				onfocusin={() => (focusedColor = color)}
+				onfocusout={() => (focusedColor = color)}
 				tabindex="0"
 				onpointerdown={(event) => startDragging(event, color)}
 				onclick={() => (activeColor = color)}
 				onkeydown={(event) => colorKeyActivate(event, color)}
+				{@attach keepColorFocus(color)}
 			></div>
 		{/each}
 	</div>
